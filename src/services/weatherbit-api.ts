@@ -31,6 +31,7 @@ export async function fetchForecast(
   location: string,
   settings: AppSettings,
   days: number = 3,
+  signal?: AbortSignal,
 ): Promise<DayWeather[]> {
   const apiKey = import.meta.env.VITE_WEATHERBIT_API_KEY;
   if (!apiKey) {
@@ -55,7 +56,7 @@ export async function fetchForecast(
 
   const url = `${baseUrl}/forecast/daily?${params.toString()}`;
 
-  const response = await fetch(url);
+  const response = await fetch(url, { signal });
   if (!response.ok) {
     throw new Error(
       `Weatherbit API error: ${response.status} ${response.statusText}`,

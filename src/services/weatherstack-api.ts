@@ -25,6 +25,7 @@ function buildCacheKey(location: string, settings: AppSettings): string {
 export async function fetchCurrentWeather(
   location: string,
   settings: AppSettings,
+  signal?: AbortSignal,
 ): Promise<WeatherStackResult> {
   const accessKey = import.meta.env.VITE_WEATHERSTACK_ACCESS_KEY;
   if (!accessKey) {
@@ -52,7 +53,7 @@ export async function fetchCurrentWeather(
 
   const url = `${baseUrl}/current?${params.toString()}`;
 
-  const response = await fetch(url);
+  const response = await fetch(url, { signal });
 
   let data: WeatherStackResponse | WeatherStackError;
   try {

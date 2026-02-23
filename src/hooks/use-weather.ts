@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import type {
   CurrentWeather,
   LocationInfo,
@@ -29,9 +29,15 @@ export function useWeather(locationQuery: string): UseWeatherReturn {
   const [today, setToday] = useState<DayWeather | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const fetchData = useCallback(async () => {
     if (!locationQuery) return;
+
+    // Abort any in-flight request (handles StrictMode double-fire)
+    abortControllerRef.current?.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
     setIsLoading(true);
     setError(null);
@@ -39,9 +45,12 @@ export function useWeather(locationQuery: string): UseWeatherReturn {
     try {
       // Fetch current weather and forecast in parallel
       const [currentResult, forecastResult] = await Promise.allSettled([
-        fetchCurrentWeather(locationQuery, settings),
-        fetchForecast(locationQuery, settings),
+        fetchCurrentWeather(locationQuery, settings, controller.signal),
+        fetchForecast(locationQuery, settings, 3, controller.signal),
       ]);
+
+      // If aborted, don't update state
+      if (controller.signal.aborted) return;
 
       // Current weather is required
       if (currentResult.status === "rejected") {
@@ -67,9 +76,15 @@ export function useWeather(locationQuery: string): UseWeatherReturn {
         setForecast(forecastResult.value);
       } else {
         setForecast([]);
-        console.warn("Forecast fetch failed:", forecastResult.reason);
+        if (!controller.signal.aborted) {
+          console.warn("Forecast fetch failed:", forecastResult.reason);
+        }
       }
     } catch (err) {
+      // Ignore abort errors — they're expected from cleanup
+      if (err instanceof DOMException && err.name === "AbortError") return;
+      if (controller.signal.aborted) return;
+
       setError(
         err instanceof Error ? err.message : "An unexpected error occurred.",
       );
@@ -79,12 +94,19 @@ export function useWeather(locationQuery: string): UseWeatherReturn {
       setHistory([]);
       setToday(null);
     } finally {
-      setIsLoading(false);
+      if (!controller.signal.aborted) {
+        setIsLoading(false);
+      }
     }
   }, [locationQuery, settings]);
 
   useEffect(() => {
     fetchData();
+
+    // Cleanup: abort in-flight requests when effect re-runs or unmounts
+    return () => {
+      abortControllerRef.current?.abort();
+    };
   }, [fetchData]);
 
   return {
