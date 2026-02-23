@@ -56,49 +56,6 @@ export interface WeatherStackError {
 }
 
 // ============================================================
-// Weatherbit API Types
-// ============================================================
-
-export interface WeatherbitForecastResponse {
-  data: WeatherbitDayData[];
-  city_name: string;
-  country_code: string;
-  lat: number;
-  lon: number;
-  timezone: string;
-  state_code: string;
-}
-
-export interface WeatherbitDayData {
-  datetime: string;
-  temp: number;
-  max_temp: number;
-  min_temp: number;
-  app_max_temp: number;
-  app_min_temp: number;
-  wind_spd: number;
-  wind_gust_spd: number;
-  wind_dir: number;
-  wind_cdir: string;
-  wind_cdir_full: string;
-  pres: number;
-  slp: number;
-  precip: number;
-  snow: number;
-  rh: number;
-  clouds: number;
-  uv: number;
-  vis: number;
-  dewpt: number;
-  pop: number;
-  weather: {
-    icon: string;
-    code: number;
-    description: string;
-  };
-}
-
-// ============================================================
 // Normalized App Types (used throughout the UI)
 // ============================================================
 

@@ -72,15 +72,14 @@ function AboutPage() {
         <CardContent className="space-y-4 text-sm text-muted-foreground">
           <div>
             <h3 className="mb-1 font-semibold text-foreground">
-              Dual API Strategy
+              WeatherStack API
             </h3>
             <p>
-              The app uses{" "}
-              <strong className="text-foreground">WeatherStack</strong> for
-              real-time current conditions and{" "}
-              <strong className="text-foreground">Weatherbit</strong> for 3-day
-              forecast data. This leverages the strengths of each API&apos;s
-              free tier to deliver the most complete experience.
+              The app uses the{" "}
+              <strong className="text-foreground">WeatherStack API</strong> for
+              real-time current weather conditions. The free tier supports
+              current weather data via HTTP, with units and location type
+              configuration passed through to the API.
             </p>
           </div>
 
@@ -88,14 +87,14 @@ function AboutPage() {
 
           <div>
             <h3 className="mb-1 font-semibold text-foreground">
-              Simulated History
+              Simulated Forecast & History
             </h3>
             <p>
-              Since neither API offers free-tier historical data, the app
-              generates deterministic history using a seeded PRNG. Values are
-              based on current conditions with realistic variance, and the same
-              seed always produces the same result — no flickering on
-              re-renders.
+              Since the WeatherStack free tier only provides current conditions,
+              the app generates deterministic forecast and history data using a
+              seeded PRNG. Values are based on current conditions with realistic
+              variance, and the same seed always produces the same result — no
+              flickering on re-renders.
             </p>
           </div>
 
@@ -172,15 +171,15 @@ function AboutPage() {
               mixed-content issue in development.
             </li>
             <li>
-              <strong className="text-foreground">Simulated history</strong> —
-              Historical weather data requires paid API plans. The deterministic
-              simulator provides consistent, realistic-looking data as a
-              practical alternative.
+              <strong className="text-foreground">Simulated forecast & history</strong>{" "}
+              — Forecast and historical data require paid API plans. The
+              deterministic simulator provides consistent, realistic-looking
+              data as a practical alternative.
             </li>
             <li>
               <strong className="text-foreground">Language support</strong> —
               WeatherStack free tier does not support the language parameter.
-              Language selection affects Weatherbit descriptions only.
+              Language is stored as a setting for future paid-tier use.
             </li>
             <li>
               <strong className="text-foreground">Rate limits</strong> —

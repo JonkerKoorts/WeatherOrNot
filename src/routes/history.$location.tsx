@@ -80,7 +80,7 @@ function HistoryPage() {
                     </span>
                     <WeatherIcon
                       weatherCode={day.weatherCode}
-                      source="weatherstack"
+
                       className="size-10 text-primary"
                     />
                     <span className="font-mono text-2xl font-bold" data-weather-value>
@@ -131,7 +131,6 @@ function HistoryPage() {
                 <CardContent className="flex items-center gap-4 p-4">
                   <WeatherIcon
                     weatherCode={day.weatherCode}
-                    source="weatherstack"
                     className="size-8 shrink-0 text-primary"
                   />
                   <div className="min-w-0 flex-1">

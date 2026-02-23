@@ -1,10 +1,8 @@
 import type {
   WeatherStackCurrent,
   WeatherStackLocation,
-  WeatherbitDayData,
   CurrentWeather,
   LocationInfo,
-  DayWeather,
   UnitSystem,
   LocationType,
 } from "@/types/weather";
@@ -46,32 +44,6 @@ export function normalizeCurrentWeather(
     isDay: raw.is_day === "yes",
     observationTime: raw.observation_time,
     iconUrl: raw.weather_icons[0] ?? "",
-  };
-}
-
-// ============================================================
-// Weatherbit Normalizer
-// ============================================================
-
-export function normalizeWeatherbitDay(raw: WeatherbitDayData): DayWeather {
-  return {
-    date: raw.datetime,
-    dayOfWeek: getDayOfWeek(raw.datetime),
-    label: getDateLabel(raw.datetime),
-    temperature: Math.round(raw.temp),
-    tempHigh: Math.round(raw.max_temp),
-    tempLow: Math.round(raw.min_temp),
-    description: raw.weather.description,
-    weatherCode: raw.weather.code,
-    windSpeed: Math.round(raw.wind_spd * 3.6), // m/s → km/h
-    windDirection: raw.wind_cdir,
-    pressure: Math.round(raw.pres),
-    precipitation: Math.round(raw.precip * 10) / 10,
-    humidity: Math.round(raw.rh),
-    cloudCover: raw.clouds,
-    uvIndex: Math.round(raw.uv),
-    isSimulated: false,
-    type: "forecast",
   };
 }
 
@@ -179,33 +151,6 @@ export function getWeatherIconName(code: number, isDay: boolean): string {
     return "CloudSnow";
   // Thunder
   if ([200, 386, 389, 392, 395].includes(code)) return "CloudLightning";
-
-  return "Cloud";
-}
-
-/**
- * Maps Weatherbit weather codes to Lucide icon names.
- * Weatherbit uses a different code range (200-900).
- */
-export function getWeatherbitIconName(code: number): string {
-  // Thunderstorm (200-233)
-  if (code >= 200 && code <= 233) return "CloudLightning";
-  // Drizzle (300-302)
-  if (code >= 300 && code <= 302) return "CloudDrizzle";
-  // Rain (500-522)
-  if (code >= 500 && code <= 522) return "CloudRain";
-  // Snow (600-623)
-  if (code >= 600 && code <= 623) return "Snowflake";
-  // Mist / Fog / Haze (700-751)
-  if (code >= 700 && code <= 751) return "CloudFog";
-  // Clear (800)
-  if (code === 800) return "Sun";
-  // Few clouds (801-802)
-  if (code === 801 || code === 802) return "CloudSun";
-  // Broken / overcast clouds (803-804)
-  if (code === 803 || code === 804) return "Cloud";
-  // Freezing (900)
-  if (code === 900) return "Snowflake";
 
   return "Cloud";
 }

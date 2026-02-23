@@ -62,6 +62,73 @@ const CONDITION_MAP: Record<number, string> = {
 };
 
 /**
+ * Generates a simulated DayWeather entry for a given date offset.
+ * Uses a seeded PRNG so values are deterministic for the same date + location.
+ */
+function generateDay(
+  current: CurrentWeather,
+  locationName: string,
+  offset: number,
+  type: "forecast" | "history",
+): DayWeather {
+  const dateStr = getDateOffset(offset);
+  const seed = hashSeed(`${locationName}_${dateStr}_${type}`);
+  const rng = seededRandom(seed);
+
+  const temp = Math.round(
+    clamp(vary(current.temperature, SIMULATION_VARIANCE.TEMP, rng()), -40, 55),
+  );
+  const wind = Math.round(
+    clamp(vary(current.windSpeed, SIMULATION_VARIANCE.WIND, rng()), 0, 120),
+  );
+  const pressure = Math.round(
+    clamp(
+      vary(current.pressure, SIMULATION_VARIANCE.PRESSURE, rng()),
+      950,
+      1060,
+    ),
+  );
+  const precip =
+    Math.round(
+      clamp(
+        vary(current.precipitation, SIMULATION_VARIANCE.PRECIP, rng()),
+        0,
+        50,
+      ) * 10,
+    ) / 10;
+  const humidity = Math.round(
+    clamp(
+      vary(current.humidity, SIMULATION_VARIANCE.HUMIDITY, rng()),
+      0,
+      100,
+    ),
+  );
+  const cloudCover = Math.round(clamp(vary(current.cloudCover, 20, rng()), 0, 100));
+  const uvIndex = Math.round(clamp(vary(current.uvIndex, 2, rng()), 0, 11));
+  const weatherCode = shiftWeatherCode(current.weatherCode, rng());
+
+  return {
+    date: dateStr,
+    dayOfWeek: getDayOfWeek(dateStr),
+    label: getDateLabel(dateStr),
+    temperature: temp,
+    tempHigh: temp + Math.round(rng() * 4 + 1),
+    tempLow: temp - Math.round(rng() * 4 + 1),
+    description: CONDITION_MAP[weatherCode] ?? current.description,
+    weatherCode,
+    windSpeed: wind,
+    windDirection: current.windDirection,
+    pressure,
+    precipitation: precip,
+    humidity,
+    cloudCover,
+    uvIndex,
+    isSimulated: true,
+    type,
+  };
+}
+
+/**
  * Wraps the current weather as a DayWeather entry representing today.
  * Not simulated — uses real API data.
  */
@@ -90,72 +157,26 @@ export function currentToDay(current: CurrentWeather): DayWeather {
 
 /**
  * Generates 3 simulated past-day weather entries based on current conditions.
- * Uses a seeded PRNG so values are deterministic for the same date + location.
  * Returns days ordered oldest to newest: [-3, -2, -1].
  */
 export function generateHistory(
   current: CurrentWeather,
   locationName: string,
 ): DayWeather[] {
-  const days: DayWeather[] = [];
+  return [-3, -2, -1].map((offset) =>
+    generateDay(current, locationName, offset, "history"),
+  );
+}
 
-  for (let i = -3; i <= -1; i++) {
-    const dateStr = getDateOffset(i);
-    const seed = hashSeed(`${locationName}_${dateStr}_history`);
-    const rng = seededRandom(seed);
-
-    const temp = Math.round(
-      clamp(vary(current.temperature, SIMULATION_VARIANCE.TEMP, rng()), -40, 55),
-    );
-    const wind = Math.round(
-      clamp(vary(current.windSpeed, SIMULATION_VARIANCE.WIND, rng()), 0, 120),
-    );
-    const pressure = Math.round(
-      clamp(
-        vary(current.pressure, SIMULATION_VARIANCE.PRESSURE, rng()),
-        950,
-        1060,
-      ),
-    );
-    const precip =
-      Math.round(
-        clamp(
-          vary(current.precipitation, SIMULATION_VARIANCE.PRECIP, rng()),
-          0,
-          50,
-        ) * 10,
-      ) / 10;
-    const humidity = Math.round(
-      clamp(
-        vary(current.humidity, SIMULATION_VARIANCE.HUMIDITY, rng()),
-        0,
-        100,
-      ),
-    );
-    const cloudCover = Math.round(clamp(vary(current.cloudCover, 20, rng()), 0, 100));
-    const uvIndex = Math.round(clamp(vary(current.uvIndex, 2, rng()), 0, 11));
-    const weatherCode = shiftWeatherCode(current.weatherCode, rng());
-
-    days.push({
-      date: dateStr,
-      dayOfWeek: getDayOfWeek(dateStr),
-      label: getDateLabel(dateStr),
-      temperature: temp,
-      tempHigh: temp + Math.round(rng() * 4 + 1),
-      tempLow: temp - Math.round(rng() * 4 + 1),
-      description: CONDITION_MAP[weatherCode] ?? current.description,
-      weatherCode,
-      windSpeed: wind,
-      windDirection: current.windDirection,
-      pressure,
-      precipitation: precip,
-      humidity,
-      cloudCover,
-      uvIndex,
-      isSimulated: true,
-      type: "history",
-    });
-  }
-
-  return days;
+/**
+ * Generates 3 simulated future-day weather entries based on current conditions.
+ * Returns days ordered soonest to furthest: [+1, +2, +3].
+ */
+export function generateForecast(
+  current: CurrentWeather,
+  locationName: string,
+): DayWeather[] {
+  return [1, 2, 3].map((offset) =>
+    generateDay(current, locationName, offset, "forecast"),
+  );
 }

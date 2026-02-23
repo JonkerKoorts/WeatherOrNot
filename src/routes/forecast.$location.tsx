@@ -46,9 +46,14 @@ function ForecastPage() {
         Back to Dashboard
       </Link>
 
-      <h1 className="text-2xl font-bold">
-        3-Day Forecast for {locationQuery}
-      </h1>
+      <div className="flex items-center gap-3">
+        <h1 className="text-2xl font-bold">
+          3-Day Forecast for {locationQuery}
+        </h1>
+        <Badge variant="secondary" className="text-xs">
+          Simulated Data
+        </Badge>
+      </div>
 
       {forecast.length === 0 ? (
         <p className="text-muted-foreground">No forecast data available.</p>
@@ -75,8 +80,7 @@ function ForecastPage() {
                     </span>
                     <WeatherIcon
                       weatherCode={day.weatherCode}
-                      source="weatherbit"
-                      className="size-10 text-primary"
+                                            className="size-10 text-primary"
                     />
                     <span className="font-mono text-2xl font-bold" data-weather-value>
                       {formatTemp(day.temperature, settings.units)}
@@ -120,8 +124,7 @@ function ForecastPage() {
                 <CardContent className="flex items-center gap-4 p-4">
                   <WeatherIcon
                     weatherCode={day.weatherCode}
-                    source="weatherbit"
-                    className="size-8 shrink-0 text-primary"
+                                        className="size-8 shrink-0 text-primary"
                   />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">

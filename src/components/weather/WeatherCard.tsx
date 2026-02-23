@@ -49,11 +49,6 @@ export function WeatherCard({
   const uvIndex = isShowingDay ? selectedDay.uvIndex : current.uvIndex;
   const isSimulated = isShowingDay && selectedDay.isSimulated;
 
-  const iconSource =
-    isShowingDay && selectedDay.type === "forecast"
-      ? "weatherbit"
-      : "weatherstack";
-
   return (
     <Card className="animate-in fade-in duration-300">
       <CardContent className="p-6 md:p-8">
@@ -67,7 +62,6 @@ export function WeatherCard({
             <WeatherIcon
               weatherCode={weatherCode}
               isDay={current.isDay}
-              source={iconSource}
               className="size-16 text-primary"
             />
             <span className="text-xl font-medium">{description}</span>

@@ -117,8 +117,8 @@ function SettingsPage() {
             </SelectContent>
           </Select>
           <p className="text-xs text-muted-foreground">
-            Affects weather condition descriptions from the Weatherbit API.
-            WeatherStack free tier does not support language selection.
+            Stored for future use. WeatherStack free tier does not support
+            language selection — descriptions are returned in English.
           </p>
         </CardContent>
       </Card>

@@ -21,9 +21,6 @@ export function DayTile({ day, isSelected, onClick }: DayTileProps) {
     }
   };
 
-  const iconSource =
-    day.type === "forecast" ? "weatherbit" : "weatherstack";
-
   return (
     <Card
       role="button"
@@ -44,7 +41,6 @@ export function DayTile({ day, isSelected, onClick }: DayTileProps) {
         <span className="text-sm font-semibold">{day.label}</span>
         <WeatherIcon
           weatherCode={day.weatherCode}
-          source={iconSource}
           className="my-1 size-8 text-primary"
         />
         <span

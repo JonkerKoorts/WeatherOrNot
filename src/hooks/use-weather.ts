@@ -6,8 +6,7 @@ import type {
 } from "@/types/weather";
 import { useSettings } from "@/hooks/use-settings";
 import { fetchCurrentWeather } from "@/services/weatherstack-api";
-import { fetchForecast } from "@/services/weatherbit-api";
-import { generateHistory, currentToDay } from "@/services/weather-simulator";
+import { generateHistory, generateForecast, currentToDay } from "@/services/weather-simulator";
 
 interface UseWeatherReturn {
   current: CurrentWeather | null;
@@ -43,43 +42,23 @@ export function useWeather(locationQuery: string): UseWeatherReturn {
     setError(null);
 
     try {
-      // Fetch current weather and forecast in parallel
-      const [currentResult, forecastResult] = await Promise.allSettled([
-        fetchCurrentWeather(locationQuery, settings, controller.signal),
-        fetchForecast(locationQuery, settings, 3, controller.signal),
-      ]);
+      const result = await fetchCurrentWeather(
+        locationQuery,
+        settings,
+        controller.signal,
+      );
 
       // If aborted, don't update state
       if (controller.signal.aborted) return;
 
-      // Current weather is required
-      if (currentResult.status === "rejected") {
-        throw new Error(
-          currentResult.reason instanceof Error
-            ? currentResult.reason.message
-            : "Failed to fetch current weather.",
-        );
-      }
-
-      const { current: currentData, location: locationData } =
-        currentResult.value;
+      const { current: currentData, location: locationData } = result;
       setCurrent(currentData);
       setLocation(locationData);
       setToday(currentToDay(currentData));
 
-      // Generate simulated history from current data
-      const historyData = generateHistory(currentData, locationData.name);
-      setHistory(historyData);
-
-      // Forecast is optional — degrade gracefully
-      if (forecastResult.status === "fulfilled") {
-        setForecast(forecastResult.value);
-      } else {
-        setForecast([]);
-        if (!controller.signal.aborted) {
-          console.warn("Forecast fetch failed:", forecastResult.reason);
-        }
-      }
+      // Generate simulated history and forecast from current data
+      setHistory(generateHistory(currentData, locationData.name));
+      setForecast(generateForecast(currentData, locationData.name));
     } catch (err) {
       // Ignore abort errors — they're expected from cleanup
       if (err instanceof DOMException && err.name === "AbortError") return;
