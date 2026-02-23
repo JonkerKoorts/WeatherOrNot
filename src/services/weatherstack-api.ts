@@ -42,21 +42,24 @@ export async function fetchCurrentWeather(
     ? WEATHERSTACK_PROXY_PATH
     : import.meta.env.VITE_WEATHERSTACK_BASE_URL;
 
+  // Note: WeatherStack free tier does NOT support the `language` parameter.
+  // Sending it causes a 605 "invalid_language" error. Only pass on paid plans.
   const params = new URLSearchParams({
     access_key: accessKey,
     query,
     units: settings.units,
-    language: settings.language,
   });
 
   const url = `${baseUrl}/current?${params.toString()}`;
 
   const response = await fetch(url);
-  if (!response.ok) {
+
+  let data: WeatherStackResponse | WeatherStackError;
+  try {
+    data = await response.json();
+  } catch {
     throw new Error(`WeatherStack API error: ${response.status} ${response.statusText}`);
   }
-
-  const data: WeatherStackResponse | WeatherStackError = await response.json();
 
   if ("success" in data && data.success === false) {
     const err = data as WeatherStackError;
