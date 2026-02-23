@@ -9,38 +9,121 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as WeatherLocationRouteImport } from './routes/weather.$location'
+import { Route as HistoryLocationRouteImport } from './routes/history.$location'
+import { Route as ForecastLocationRouteImport } from './routes/forecast.$location'
 
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WeatherLocationRoute = WeatherLocationRouteImport.update({
+  id: '/weather/$location',
+  path: '/weather/$location',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoryLocationRoute = HistoryLocationRouteImport.update({
+  id: '/history/$location',
+  path: '/history/$location',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForecastLocationRoute = ForecastLocationRouteImport.update({
+  id: '/forecast/$location',
+  path: '/forecast/$location',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/settings': typeof SettingsRoute
+  '/forecast/$location': typeof ForecastLocationRoute
+  '/history/$location': typeof HistoryLocationRoute
+  '/weather/$location': typeof WeatherLocationRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/settings': typeof SettingsRoute
+  '/forecast/$location': typeof ForecastLocationRoute
+  '/history/$location': typeof HistoryLocationRoute
+  '/weather/$location': typeof WeatherLocationRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/settings': typeof SettingsRoute
+  '/forecast/$location': typeof ForecastLocationRoute
+  '/history/$location': typeof HistoryLocationRoute
+  '/weather/$location': typeof WeatherLocationRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/settings'
+    | '/forecast/$location'
+    | '/history/$location'
+    | '/weather/$location'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/about'
+    | '/settings'
+    | '/forecast/$location'
+    | '/history/$location'
+    | '/weather/$location'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/settings'
+    | '/forecast/$location'
+    | '/history/$location'
+    | '/weather/$location'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  SettingsRoute: typeof SettingsRoute
+  ForecastLocationRoute: typeof ForecastLocationRoute
+  HistoryLocationRoute: typeof HistoryLocationRoute
+  WeatherLocationRoute: typeof WeatherLocationRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +131,37 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/weather/$location': {
+      id: '/weather/$location'
+      path: '/weather/$location'
+      fullPath: '/weather/$location'
+      preLoaderRoute: typeof WeatherLocationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/history/$location': {
+      id: '/history/$location'
+      path: '/history/$location'
+      fullPath: '/history/$location'
+      preLoaderRoute: typeof HistoryLocationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forecast/$location': {
+      id: '/forecast/$location'
+      path: '/forecast/$location'
+      fullPath: '/forecast/$location'
+      preLoaderRoute: typeof ForecastLocationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
+  SettingsRoute: SettingsRoute,
+  ForecastLocationRoute: ForecastLocationRoute,
+  HistoryLocationRoute: HistoryLocationRoute,
+  WeatherLocationRoute: WeatherLocationRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
