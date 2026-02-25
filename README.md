@@ -6,8 +6,8 @@ A production-ready weather dashboard built with React, TypeScript, and the Weath
 
 **Core Features**
 - Current weather display with real-time data from WeatherStack API
-- 3-day weather forecast (simulated from current conditions)
-- 3-day weather history (simulated from current conditions)
+- 3-day weather forecast with real data from Open-Meteo API
+- 3-day weather history with real data from Open-Meteo API
 - Interactive day selection — click any forecast or history tile to view detailed data in the main display
 - Keyboard-accessible tiles (Enter/Space to select, aria-pressed for screen readers)
 
@@ -27,6 +27,9 @@ A production-ready weather dashboard built with React, TypeScript, and the Weath
 - Forecast and history detail pages with grid/list toggle views
 - Loading skeletons during API fetches
 - Error handling with retry functionality
+- Stale-while-revalidate loading pattern
+- Error boundary for crash recovery
+- Skip-to-content link and full ARIA accessibility
 
 ## Tech Stack
 
@@ -37,13 +40,14 @@ A production-ready weather dashboard built with React, TypeScript, and the Weath
 - **shadcn/ui** — accessible, composable UI components
 - **Lucide React** — icon library
 - **Vitest** + **Testing Library** — unit and integration testing
-- **WeatherStack API** — real-time weather data
+- **WeatherStack API** — real-time current weather data
+- **Open-Meteo API** — forecast and historical weather data (free, no key required)
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ (or Bun)
+- [Bun](https://bun.sh/) (recommended) or Node.js 18+
 - A free WeatherStack API key ([sign up here](https://weatherstack.com/signup/free))
 
 ### Installation
@@ -51,7 +55,7 @@ A production-ready weather dashboard built with React, TypeScript, and the Weath
 ```bash
 git clone <repo-url>
 cd WeatherOrNot
-npm install
+bun install
 ```
 
 ### Environment Setup
@@ -64,15 +68,19 @@ cp .env.example .env
 
 Edit `.env` and replace the placeholder with your actual WeatherStack access key:
 
-```
+```env
+# Required — WeatherStack API (current weather + location lookup)
 VITE_WEATHERSTACK_ACCESS_KEY=your_weatherstack_access_key_here
 VITE_WEATHERSTACK_BASE_URL=http://api.weatherstack.com
+
+# Optional — Open-Meteo API (forecast + history, free, no key needed)
+VITE_OPENMETEO_FORECAST_URL=https://api.open-meteo.com/v1/forecast
 ```
 
 ### Development Server
 
 ```bash
-npm run dev
+bun run dev
 ```
 
 The app will be available at `http://localhost:5173`. A Vite dev proxy is configured to bridge WeatherStack's HTTP-only API.
@@ -80,23 +88,26 @@ The app will be available at `http://localhost:5173`. A Vite dev proxy is config
 ## Running Tests
 
 ```bash
-npm test           # Watch mode
-npm run test:run   # Single run
-npm run test:coverage  # With coverage report
+bun test           # Watch mode
+bun run test:run   # Single run
+bun run test:coverage  # With coverage report
 ```
 
-**Test suite:** 92 tests across 9 test files covering:
+**Test suite:** 119 tests across 12 test files covering:
 - Core weather components (WeatherCard, DayTile, ForecastGrid, HistoryGrid)
 - Interactive day selection integration test
 - WeatherStack API service (with mocked fetch)
+- Open-Meteo API service (unit conversion, caching, error handling)
 - Weather simulator determinism and output validation
-- Cache utility (get/set/clear/expiry)
+- Cache utility (get/set/clear/expiry/quota recovery)
 - Weather utility functions (formatters, normalizers, icon mapping)
+- Settings context (persistence, partial updates, reset, corruption recovery)
+- useLocalStorage hook (state sync, functional updates, edge cases)
 
 ## Building for Production
 
 ```bash
-npm run build
+bun run build
 ```
 
 Output is generated in the `dist/` directory.
@@ -123,7 +134,7 @@ src/
 │   ├── settings.tsx     # Full settings page
 │   ├── about.tsx        # Architecture & design decisions
 │   └── __root.tsx       # App shell + 404
-├── services/            # weatherstack-api, weather-simulator
+├── services/            # weatherstack-api, openmeteo-api, weather-simulator
 ├── test/                # Test setup, utils, mock data
 └── types/               # TypeScript type definitions
 ```
@@ -132,11 +143,12 @@ src/
 
 ### API Strategy
 
-WeatherStack's free tier only provides the `/current` endpoint (no forecast or historical data) and is limited to HTTP. To work within these constraints:
+The app uses a dual-API approach:
 
-- **Current weather**: Fetched from WeatherStack API with caching
-- **Forecast & History**: Generated locally using a **deterministic seeded PRNG** simulator that varies temperature, wind, pressure, and conditions based on current data. The seed uses location + date, ensuring consistent values across re-renders
-- **Dev proxy**: Vite's dev server proxies `/api/weatherstack` to bridge HTTPS → HTTP in development
+- **Current weather**: Fetched from WeatherStack API (provides location lat/lon and real-time conditions) with TTL-based caching
+- **Forecast & History**: Fetched from Open-Meteo API using the lat/lon from WeatherStack. Open-Meteo is free, requires no API key, and provides real forecast and historical data. WMO weather codes are mapped to WeatherStack codes for consistent icon/description display
+- **Fallback simulator**: A deterministic seeded PRNG simulator is available as a fallback when Open-Meteo is unavailable
+- **Dev proxy**: Vite's dev server proxies `/api/weatherstack` to bridge HTTPS → HTTP in development (WeatherStack free tier is HTTP-only)
 
 ### Why TanStack Router
 
@@ -152,11 +164,11 @@ All user preferences (units, language, location type, default location, cache TT
 
 ### Caching
 
-TTL-based localStorage caching prevents unnecessary API calls. Each cache entry includes a timestamp and TTL. Expired entries are automatically cleaned up on read. Users can configure or disable caching from Settings.
+TTL-based localStorage caching prevents unnecessary API calls. Each cache entry includes a timestamp and TTL. Expired entries are automatically cleaned up on read. When storage quota is exceeded, expired entries are evicted before retrying. Users can configure or disable caching from Settings.
 
 ## Trade-offs & Limitations
 
 - **Free tier constraints**: WeatherStack free plan is HTTP-only (~100 req/month, no HTTPS, no forecast/historical endpoints). The Vite dev proxy handles the mixed-content issue
-- **Simulated data**: Forecast and history are generated locally, not from real historical/forecast APIs. A "Simulated Data" badge clearly indicates this to users
+- **Dual-API dependency**: Forecast and history require both APIs to succeed — WeatherStack provides lat/lon, Open-Meteo uses them for forecast/history data
 - **Language parameter**: WeatherStack free tier doesn't support the `language` query parameter (returns 605 error). Language settings are stored for future paid-tier support
 - **Rate limiting**: The app includes AbortController-based request deduplication to avoid StrictMode double-fire in development
