@@ -50,9 +50,6 @@ function ForecastPage() {
         <h1 className="text-2xl font-bold">
           3-Day Forecast for {locationQuery}
         </h1>
-        <Badge variant="secondary" className="text-xs">
-          Simulated Data
-        </Badge>
       </div>
 
       {forecast.length === 0 ? (

@@ -50,9 +50,6 @@ function HistoryPage() {
         <h1 className="text-2xl font-bold">
           3-Day History for {locationQuery}
         </h1>
-        <Badge variant="secondary" className="text-xs">
-          Simulated Data
-        </Badge>
       </div>
 
       {history.length === 0 ? (
@@ -113,12 +110,6 @@ function HistoryPage() {
                         value={`${day.cloudCover}%`}
                       />
                     </div>
-                    <Badge
-                      variant="outline"
-                      className="mt-1 text-[10px] text-muted-foreground"
-                    >
-                      simulated
-                    </Badge>
                   </CardContent>
                 </Card>
               ))}
@@ -157,12 +148,6 @@ function HistoryPage() {
                         Precip:{formatPrecip(day.precipitation, settings.units)}
                       </span>
                       <span>Humidity:{day.humidity}%</span>
-                      <Badge
-                        variant="outline"
-                        className="text-[10px] text-muted-foreground"
-                      >
-                        simulated
-                      </Badge>
                     </div>
                   </div>
                 </CardContent>

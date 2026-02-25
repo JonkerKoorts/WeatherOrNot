@@ -71,10 +71,8 @@ function WeatherDashboard() {
         onClearSelection={clearSelection}
       />
 
-      {/* Expanded day detail */}
-      {displayedWeather && selectedDay.day && (
-        <WeatherDetail day={displayedWeather} />
-      )}
+      {/* Expanded day detail (shows current day by default) */}
+      {displayedWeather && <WeatherDetail day={displayedWeather} />}
 
       {/* History + Forecast grids */}
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">

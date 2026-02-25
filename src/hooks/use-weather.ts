@@ -6,7 +6,7 @@ import type {
 } from "@/types/weather";
 import { useSettings } from "@/hooks/use-settings";
 import { fetchCurrentWeather } from "@/services/weatherstack-api";
-import { generateHistory, generateForecast, currentToDay } from "@/services/weather-simulator";
+import { fetchOpenMeteoWeather } from "@/services/openmeteo-api";
 
 interface UseWeatherReturn {
   current: CurrentWeather | null;
@@ -42,23 +42,34 @@ export function useWeather(locationQuery: string): UseWeatherReturn {
     setError(null);
 
     try {
+      // 1. Fetch current weather from WeatherStack (also gives us lat/lon)
       const result = await fetchCurrentWeather(
         locationQuery,
         settings,
         controller.signal,
       );
 
-      // If aborted, don't update state
       if (controller.signal.aborted) return;
 
       const { current: currentData, location: locationData } = result;
       setCurrent(currentData);
       setLocation(locationData);
-      setToday(currentToDay(currentData));
 
-      // Generate simulated history and forecast from current data
-      setHistory(generateHistory(currentData, locationData.name));
-      setForecast(generateForecast(currentData, locationData.name));
+      // 2. Fetch real forecast + history from Open-Meteo using lat/lon
+      const cacheTtlMs = settings.cacheTtlMinutes * 60 * 1000;
+      const openMeteo = await fetchOpenMeteoWeather(
+        locationData.lat,
+        locationData.lon,
+        settings.units,
+        cacheTtlMs,
+        controller.signal,
+      );
+
+      if (controller.signal.aborted) return;
+
+      setToday(openMeteo.today);
+      setHistory(openMeteo.history);
+      setForecast(openMeteo.forecast);
     } catch (err) {
       // Ignore abort errors — they're expected from cleanup
       if (err instanceof DOMException && err.name === "AbortError") return;
