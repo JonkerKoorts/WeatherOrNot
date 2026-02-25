@@ -49,6 +49,8 @@ export function Header() {
             variant="ghost"
             size="icon-sm"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-nav-menu"
             onClick={() => setMobileOpen((prev) => !prev)}
           >
             {mobileOpen ? (
@@ -62,7 +64,7 @@ export function Header() {
 
       {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="border-t bg-background px-4 py-3 md:hidden animate-in fade-in slide-in-from-top-2 duration-200">
+        <div id="mobile-nav-menu" className="border-t bg-background px-4 py-3 md:hidden animate-in fade-in slide-in-from-top-2 duration-200">
           <Navigation
             orientation="vertical"
             onNavigate={() => setMobileOpen(false)}

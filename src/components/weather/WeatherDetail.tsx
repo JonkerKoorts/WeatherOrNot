@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Thermometer,
@@ -23,7 +24,7 @@ interface WeatherDetailProps {
   day: DayWeather;
 }
 
-export function WeatherDetail({ day }: WeatherDetailProps) {
+export const WeatherDetail = memo(function WeatherDetail({ day }: WeatherDetailProps) {
   const { settings } = useSettings();
 
   const metrics = [
@@ -91,4 +92,4 @@ export function WeatherDetail({ day }: WeatherDetailProps) {
       </div>
     </div>
   );
-}
+});

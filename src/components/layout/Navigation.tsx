@@ -20,6 +20,7 @@ export function Navigation({
 
   return (
     <nav
+      aria-label={isVertical ? "Mobile navigation" : "Main navigation"}
       className={cn(
         "flex gap-1",
         isVertical ? "flex-col" : "flex-row items-center",

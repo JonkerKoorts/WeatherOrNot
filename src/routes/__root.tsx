@@ -4,13 +4,23 @@ import { Cloud, CloudOff } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 function RootLayout() {
   return (
     <div className="flex min-h-screen flex-col">
+      {/* Skip to main content link for keyboard/screen reader users */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-100 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:shadow-lg"
+      >
+        Skip to main content
+      </a>
       <Header />
-      <main className="flex-1">
-        <Outlet />
+      <main id="main-content" className="flex-1" role="main">
+        <ErrorBoundary>
+          <Outlet />
+        </ErrorBoundary>
       </main>
       <Footer />
       <TanStackRouterDevtools />

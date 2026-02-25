@@ -1,4 +1,4 @@
-import type { KeyboardEvent } from "react";
+import { memo, type KeyboardEvent } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { WeatherIcon } from "@/components/weather/WeatherIcon";
 import { useSettings } from "@/hooks/use-settings";
@@ -11,7 +11,7 @@ interface DayTileProps {
   onClick: (day: DayWeather) => void;
 }
 
-export function DayTile({ day, isSelected, onClick }: DayTileProps) {
+export const DayTile = memo(function DayTile({ day, isSelected, onClick }: DayTileProps) {
   const { settings } = useSettings();
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -60,4 +60,4 @@ export function DayTile({ day, isSelected, onClick }: DayTileProps) {
       </CardContent>
     </Card>
   );
-}
+});

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import {
   Sun,
   Moon,
@@ -33,7 +34,7 @@ interface WeatherIconProps extends LucideProps {
   isDay?: boolean;
 }
 
-export function WeatherIcon({
+export const WeatherIcon = memo(function WeatherIcon({
   weatherCode,
   isDay = true,
   ...props
@@ -42,4 +43,4 @@ export function WeatherIcon({
   const IconComponent = ICON_MAP[iconName] ?? Cloud;
 
   return <IconComponent {...props} />;
-}
+});

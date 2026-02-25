@@ -139,6 +139,14 @@ export function LocationSearch({
           onKeyDown={handleKeyDown}
           placeholder={defaultPlaceholder}
           autoFocus={autoFocus}
+          role="combobox"
+          aria-expanded={showDropdown && recentSearches.length > 0}
+          aria-controls="recent-searches-listbox"
+          aria-activedescendant={
+            highlightIndex >= 0 ? `recent-search-${highlightIndex}` : undefined
+          }
+          aria-autocomplete="list"
+          aria-label="Search location"
           className={`transition-shadow focus:shadow-md ${
             isLarge
               ? "h-14 pl-11 pr-4 text-lg"
@@ -149,10 +157,13 @@ export function LocationSearch({
 
       {showDropdown && recentSearches.length > 0 && (
         <div className="absolute top-full z-50 mt-1 w-full rounded-lg border bg-card shadow-lg">
-          <ul className="py-1">
+          <ul id="recent-searches-listbox" role="listbox" aria-label="Recent searches" className="py-1">
             {recentSearches.map((search, index) => (
               <li
+                id={`recent-search-${index}`}
                 key={`${search.location}-${search.timestamp}`}
+                role="option"
+                aria-selected={index === highlightIndex}
                 className={`flex cursor-pointer items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-accent ${
                   index === highlightIndex ? "bg-accent" : ""
                 }`}

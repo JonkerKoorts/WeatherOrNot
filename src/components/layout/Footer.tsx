@@ -8,7 +8,7 @@ export function Footer() {
           <p className="text-sm text-muted-foreground">
             Built with React, TypeScript &amp; WeatherStack API
           </p>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <nav aria-label="Footer navigation" className="flex items-center gap-4 text-sm text-muted-foreground">
             <Link
               to="/about"
               className="transition-colors hover:text-foreground"
@@ -22,7 +22,7 @@ export function Footer() {
               Settings
             </Link>
             <span>&copy; {new Date().getFullYear()} WeatherOrNot</span>
-          </div>
+          </nav>
         </div>
       </div>
     </footer>

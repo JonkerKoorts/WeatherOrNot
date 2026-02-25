@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle, RefreshCw, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LocationSearch } from "@/components/search/LocationSearch";
 import { WeatherCard } from "@/components/weather/WeatherCard";
@@ -31,11 +31,12 @@ function WeatherDashboard() {
     displayedWeather,
   } = useWeatherData(locationQuery);
 
-  if (isLoading) {
+  // Show skeleton only on initial load (no data yet)
+  if (isLoading && !current) {
     return <WeatherSkeleton />;
   }
 
-  if (error || !current || !location) {
+  if (error && !current) {
     return (
       <div className="container mx-auto flex flex-col items-center gap-6 px-4 py-16">
         <AlertCircle className="size-16 text-destructive" />
@@ -56,12 +57,33 @@ function WeatherDashboard() {
     );
   }
 
+  if (!current || !location) return <WeatherSkeleton />;
+
   return (
     <div className="container mx-auto space-y-8 px-4 py-8">
       {/* Search bar */}
       <div className="mx-auto max-w-md">
         <LocationSearch />
       </div>
+
+      {/* Refreshing indicator — shown when revalidating with stale data */}
+      {isLoading && (
+        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground" role="status">
+          <Loader2 className="size-4 animate-spin" />
+          <span>Updating weather data...</span>
+        </div>
+      )}
+
+      {/* Stale data error banner */}
+      {error && current && (
+        <div className="flex items-center justify-center gap-2 rounded-md border border-destructive/20 bg-destructive/5 px-4 py-2 text-sm text-destructive">
+          <AlertCircle className="size-4 shrink-0" />
+          <span>Failed to refresh: {error}</span>
+          <Button variant="ghost" size="sm" onClick={refetch} className="ml-2 h-7 text-xs">
+            Retry
+          </Button>
+        </div>
+      )}
 
       {/* Main weather card */}
       <WeatherCard

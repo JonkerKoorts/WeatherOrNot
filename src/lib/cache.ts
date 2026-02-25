@@ -20,6 +20,29 @@ export function getCached<T>(key: string): T | null {
   }
 }
 
+/**
+ * Evict expired cache entries to free up localStorage space.
+ * Called automatically when storage quota is exceeded.
+ */
+function evictExpiredEntries(): void {
+  const now = Date.now();
+  const keys = Object.keys(localStorage);
+  for (const key of keys) {
+    if (!key.startsWith(CACHE_PREFIX)) continue;
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      const entry = JSON.parse(raw) as CacheEntry<unknown>;
+      if (now - entry.timestamp > entry.ttl) {
+        localStorage.removeItem(key);
+      }
+    } catch {
+      // Corrupted entry — remove it
+      localStorage.removeItem(key);
+    }
+  }
+}
+
 export function setCache<T>(
   key: string,
   data: T,
@@ -27,15 +50,22 @@ export function setCache<T>(
 ): void {
   if (ttlMs <= 0) return;
 
+  const entry: CacheEntry<T> = {
+    data,
+    timestamp: Date.now(),
+    ttl: ttlMs,
+  };
+
   try {
-    const entry: CacheEntry<T> = {
-      data,
-      timestamp: Date.now(),
-      ttl: ttlMs,
-    };
     localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(entry));
   } catch {
-    // localStorage full or unavailable — silently fail
+    // Likely quota exceeded — evict expired entries and retry once
+    try {
+      evictExpiredEntries();
+      localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(entry));
+    } catch {
+      // Storage still full or unavailable — silently fail
+    }
   }
 }
 

@@ -38,7 +38,12 @@ export function useWeather(locationQuery: string): UseWeatherReturn {
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
-    setIsLoading(true);
+    // Stale-while-revalidate: only show full loading state on first load.
+    // If we already have data, keep showing it while fetching fresh data.
+    const hasExistingData = current !== null;
+    if (!hasExistingData) {
+      setIsLoading(true);
+    }
     setError(null);
 
     try {
@@ -78,11 +83,14 @@ export function useWeather(locationQuery: string): UseWeatherReturn {
       setError(
         err instanceof Error ? err.message : "An unexpected error occurred.",
       );
-      setCurrent(null);
-      setLocation(null);
-      setForecast([]);
-      setHistory([]);
-      setToday(null);
+      // Only clear data on error if this was the initial load
+      if (!hasExistingData) {
+        setCurrent(null);
+        setLocation(null);
+        setForecast([]);
+        setHistory([]);
+        setToday(null);
+      }
     } finally {
       if (!controller.signal.aborted) {
         setIsLoading(false);
